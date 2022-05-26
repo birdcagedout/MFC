@@ -1,0 +1,5 @@
+﻿  M02ListCtrl2Dlg.cpp
+C:\Dev\MFC\M02ListCtrl2\M02ListCtrl2Dlg.cpp(72,63): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Dev\MFC\M02ListCtrl2\M02ListCtrl2Dlg.cpp(73,65): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Dev\MFC\M02ListCtrl2\M02ListCtrl2Dlg.cpp(74,68): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+  M02ListCtrl2.vcxproj -> C:\Dev\MFC\M02ListCtrl2\x64\Debug\M02ListCtrl2.exe

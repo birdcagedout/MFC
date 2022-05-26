@@ -1,0 +1,5 @@
+﻿  CNewDlg.cpp
+  M07ModalDialogDlg.cpp
+C:\Dev\MFC\M07ModalDialog\M07ModalDialogDlg.cpp(101,15): warning C4244: '초기화 중': 'INT_PTR'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  코드를 생성하고 있습니다...
+  M07ModalDialog.vcxproj -> C:\Dev\MFC\M07ModalDialog\x64\Debug\M07ModalDialog.exe

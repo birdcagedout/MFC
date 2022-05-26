@@ -1,0 +1,5 @@
+﻿  M01Test.cpp
+  M01TestDlg.cpp
+C:\Dev\MFC\M01Test\M01TestDlg.cpp(163,10): warning C4244: '초기화 중': 'LRESULT'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  코드를 생성하고 있습니다...
+  M01Test.vcxproj -> C:\Dev\MFC\M01Test\x64\Debug\M01Test.exe

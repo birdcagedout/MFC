@@ -1,0 +1,1 @@
+C:\Dev\MFC\M20FindWindowEx\x64\Debug\M20FindWindowEx.exe
