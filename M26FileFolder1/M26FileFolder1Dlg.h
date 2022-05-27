@@ -39,4 +39,5 @@ public:
 	void ChangeDirectory(bool isLeft);
 	afx_msg void OnLbnDblclkListLshow();
 	afx_msg void OnLbnDblclkListRshow();
+	afx_msg void OnBnClickedButtonRNewFolder();
 };

@@ -183,6 +183,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CNewFolderDlg.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="M26FileFolder1.h" />
     <ClInclude Include="M26FileFolder1Dlg.h" />
@@ -191,6 +192,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CNewFolderDlg.cpp" />
     <ClCompile Include="M26FileFolder1.cpp" />
     <ClCompile Include="M26FileFolder1Dlg.cpp" />
     <ClCompile Include="pch.cpp">

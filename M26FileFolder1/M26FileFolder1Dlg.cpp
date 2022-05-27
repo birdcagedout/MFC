@@ -35,6 +35,7 @@ BEGIN_MESSAGE_MAP(CM26FileFolder1Dlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_LBN_DBLCLK(IDC_LIST_LSHOW, &CM26FileFolder1Dlg::OnLbnDblclkListLshow)
 	ON_LBN_DBLCLK(IDC_LIST_RSHOW, &CM26FileFolder1Dlg::OnLbnDblclkListRshow)
+	ON_BN_CLICKED(IDC_BUTTON_R_NEW_FOLDER, &CM26FileFolder1Dlg::OnBnClickedButtonRNewFolder)
 END_MESSAGE_MAP()
 
 
@@ -238,4 +239,13 @@ void CM26FileFolder1Dlg::OnLbnDblclkListLshow()
 void CM26FileFolder1Dlg::OnLbnDblclkListRshow()
 {
 	ChangeDirectory(false);
+}
+
+
+// 오른쪽 "새폴더" 생성
+void CM26FileFolder1Dlg::OnBnClickedButtonRNewFolder()
+{
+	// 새폴더 이름받는 대화상자 추가
+
+
 }
