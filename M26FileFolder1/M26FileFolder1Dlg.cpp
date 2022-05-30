@@ -36,6 +36,9 @@ BEGIN_MESSAGE_MAP(CM26FileFolder1Dlg, CDialogEx)
 	ON_LBN_DBLCLK(IDC_LIST_LSHOW, &CM26FileFolder1Dlg::OnLbnDblclkListLshow)
 	ON_LBN_DBLCLK(IDC_LIST_RSHOW, &CM26FileFolder1Dlg::OnLbnDblclkListRshow)
 	ON_BN_CLICKED(IDC_BUTTON_R_NEW_FOLDER, &CM26FileFolder1Dlg::OnBnClickedButtonRNewFolder)
+	ON_BN_CLICKED(IDC_BUTTON_COPY_L2R, &CM26FileFolder1Dlg::OnBnClickedButtonCopyL2r)
+	ON_BN_CLICKED(IDC_BUTTON_R_OPEN_FOLDER, &CM26FileFolder1Dlg::OnBnClickedButtonROpenFolder)
+	ON_BN_CLICKED(IDC_BUTTON_R_DELETE_FILE, &CM26FileFolder1Dlg::OnBnClickedButtonRDeleteFile)
 END_MESSAGE_MAP()
 
 
@@ -56,7 +59,7 @@ BOOL CM26FileFolder1Dlg::OnInitDialog()
 	int pathLen = GetCurrentDirectory(MAX_PATH, fullPath);
 
 	fullPath[pathLen] = '\\';
-	fullPath[pathLen + 1] = NULL;
+	fullPath[pathLen + 1] = NULL;							// 현시점에서 fullPath는 끝에 '\' 포함
 
 	SetDlgItemText(IDC_EDIT_LPATH, fullPath);
 	SetDlgItemText(IDC_EDIT_RPATH, fullPath);
@@ -79,9 +82,10 @@ void CM26FileFolder1Dlg::FileDirectoryToListbox(CListBox* a_pListBox, CString a_
 	// 변수 초기화: MFC 방식
 	//m_listboxLeft.Dir(DDL_ARCHIVE | DDL_HIDDEN | DDL_READONLY | DDL_DIRECTORY /*| DDL_DRIVES*/, L".\\*.*");
 
+
 	// 변수 초기화: API 방식
 	WIN32_FIND_DATA fileData;
-	HANDLE hItemList = FindFirstFile(a_strPath + L"*.*", &fileData);		// 파일이름 string 끝에 trailing \ 없어야 됨
+	HANDLE hItemList = FindFirstFile(a_strPath + L"*.*", &fileData);		// 파일이름 string 끝에 "trailing \"는 없어야 됨
 
 	if (hItemList != INVALID_HANDLE_VALUE) {
 
@@ -97,7 +101,7 @@ void CM26FileFolder1Dlg::FileDirectoryToListbox(CListBox* a_pListBox, CString a_
 				if ((fileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != NULL) {
 					filename = L"[" + filename + L"]";
 
-					// 이미 저장된 폴더들 중에서는 마지막에 넣는다
+					// 이미 저장된 폴더들 중에서는 마지막에 넣는다 ==> 폴더이름 오름차순 정렬
 					int i = a_pListBox->GetCount();
 					for (; i > 0; i--) {
 						CString strItem;
@@ -242,10 +246,94 @@ void CM26FileFolder1Dlg::OnLbnDblclkListRshow()
 }
 
 
-// 오른쪽 "새폴더" 생성
+#include "CNewFolderDlg.h"
+
+// 오른쪽 "새폴더" 버튼
 void CM26FileFolder1Dlg::OnBnClickedButtonRNewFolder()
 {
-	// 새폴더 이름받는 대화상자 추가
+	CNewFolderDlg dlg;
+	if (dlg.DoModal() == IDOK) {
+
+		// 현재 경로 + 폴더이름
+		CString currentPath, folderName;
+		GetDlgItemText(IDC_EDIT_RPATH, currentPath);
+		folderName = dlg.GetFolderName();
+
+		// 현재 경로에 폴더 만들기 ==> 성공시
+		if (CreateDirectory(currentPath + folderName, NULL) != 0) {
+			SetDlgItemText(IDC_EDIT_RPATH, currentPath + folderName + L'\\');
+			FileDirectoryToListbox(&m_listboxRight, currentPath);
+		}
+		// 현재 경로에 폴더 만들기 ==> 실패시
+		else {
+			DWORD err = GetLastError();
+			if (err == ERROR_ALREADY_EXISTS) {
+				MessageBox(L"해당 이름의 폴더가 이미 존재합니다.", L"에러", MB_OK | MB_ICONERROR);
+			}
+			else if (err == ERROR_PATH_NOT_FOUND) {
+				MessageBox(L"해당 경로가 유효하지 않습니다.", L"에러", MB_OK | MB_ICONERROR);
+			}
+		}
 
 
+
+	}
+
+
+}
+
+
+void CM26FileFolder1Dlg::OnBnClickedButtonCopyL2r()
+{
+	int index = m_listboxLeft.GetCurSel();
+	if (index != LB_ERR) {
+		CString fileName;
+		m_listboxLeft.GetText(index, fileName);
+
+		if (fileName[0] == '[') {
+			MessageBox(L"디렉토리는 복사할 수 없습니다.", L"에러", MB_OK | MB_ICONERROR);
+		}
+		else {
+			CString srcPath, dstPath;
+			GetDlgItemText(IDC_EDIT_LPATH, srcPath);
+			GetDlgItemText(IDC_EDIT_RPATH, dstPath);
+			CopyFile(srcPath + fileName, dstPath + fileName, FALSE);				// FALSE=덮어쓰기, TRUE=복사실패
+			FileDirectoryToListbox(&m_listboxRight, dstPath);
+		}
+	}
+}
+
+
+// 폴더 열기 버튼
+void CM26FileFolder1Dlg::OnBnClickedButtonROpenFolder()
+{
+	CString dstPath;
+	GetDlgItemText(IDC_EDIT_RPATH, dstPath);
+	ShellExecute(NULL, L"open", L"Explorer.exe", dstPath, dstPath, SW_SHOW);	// 탐색기 열기
+}
+
+
+// 파일 삭제 버튼
+void CM26FileFolder1Dlg::OnBnClickedButtonRDeleteFile()
+{
+	int index = m_listboxRight.GetCurSel();
+	if (index != LB_ERR) {
+		CString fileName;
+		m_listboxRight.GetText(index, fileName);
+
+		// 폴더는 삭제 못함
+		if (fileName[0] == '[') {
+			MessageBox(L"디렉토리는 삭제할 수 없습니다.", L"에러", MB_OK | MB_ICONERROR);
+		}
+		// 파일이면 삭제
+		else {
+			if (MessageBox(fileName, L"아래 파일을 삭제하시겠습니까?", MB_OKCANCEL | MB_ICONQUESTION) == IDOK) {
+				CString path;
+				GetDlgItemText(IDC_EDIT_RPATH, path);
+				DeleteFile(path + fileName);
+				FileDirectoryToListbox(&m_listboxRight, path);
+			}
+		}
+
+	}
 }

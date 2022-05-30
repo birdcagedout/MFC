@@ -18,7 +18,7 @@ public:
 #endif
 
 protected:
-	CString m_folderName;
+	CString m_folderName;								// 폴더 이름
 
 
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 지원입니다.
@@ -26,4 +26,5 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnBnClickedOk();
+	CString GetFolderName();
 };

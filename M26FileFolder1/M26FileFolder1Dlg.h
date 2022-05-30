@@ -40,4 +40,7 @@ public:
 	afx_msg void OnLbnDblclkListLshow();
 	afx_msg void OnLbnDblclkListRshow();
 	afx_msg void OnBnClickedButtonRNewFolder();
+	afx_msg void OnBnClickedButtonCopyL2r();
+	afx_msg void OnBnClickedButtonROpenFolder();
+	afx_msg void OnBnClickedButtonRDeleteFile();
 };
