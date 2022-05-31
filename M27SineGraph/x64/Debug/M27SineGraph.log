@@ -1,3 +1,0 @@
-﻿  M27SineGraphDlg.cpp
-C:\Dev\MFC\M27SineGraph\M27SineGraphDlg.cpp(91,7): warning C4101: 'x' :참조되지 않은 지역 변수입니다.
-  M27SineGraph.vcxproj -> C:\Dev\MFC\M27SineGraph\x64\Debug\M27SineGraph.exe
