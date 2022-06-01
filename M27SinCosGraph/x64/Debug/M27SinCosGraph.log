@@ -1,2 +1,5 @@
-﻿  M27SinCosGraphDlg.cpp
+﻿  pch.cpp
+  M27SinCosGraph.cpp
+  M27SinCosGraphDlg.cpp
+  코드를 생성하고 있습니다...
   M27SinCosGraph.vcxproj -> C:\Dev\MFC\M27SinCosGraph\x64\Debug\M27SinCosGraph.exe

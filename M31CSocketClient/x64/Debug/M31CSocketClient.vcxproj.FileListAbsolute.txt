@@ -1,0 +1,1 @@
+C:\Dev\MFC\M31CSocketClient\x64\Debug\M31CSocketClient.exe
