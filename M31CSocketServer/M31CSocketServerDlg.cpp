@@ -26,6 +26,7 @@ CM31CSocketServerDlg::CM31CSocketServerDlg(CWnd* pParent /*=nullptr*/)
 void CM31CSocketServerDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_LIST_EVENT, m_eventList);
 }
 
 BEGIN_MESSAGE_MAP(CM31CSocketServerDlg, CDialogEx)
@@ -46,13 +47,9 @@ BOOL CM31CSocketServerDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 
-
-	// 소켓 생성 초기화
-	m_server.Create(25000);							// 포트번호만
-	//m_server.Create(25000, 1, L"192.168.0.10");	// IP까지 적어줄 수도 있다.
-	m_server.Listen();
-
-
+	// 소켓 초기화
+	m_serverSock.Create(25000);
+	m_serverSock.Listen();
 
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
@@ -92,5 +89,11 @@ void CM31CSocketServerDlg::OnPaint()
 HCURSOR CM31CSocketServerDlg::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
+}
+
+void CM31CSocketServerDlg::AddEventString(const wchar_t* str)
+{
+	int index = m_eventList.InsertString(-1, str);
+	m_eventList.SetCurSel(index);
 }
 

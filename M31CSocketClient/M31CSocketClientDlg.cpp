@@ -92,8 +92,9 @@ HCURSOR CM31CSocketClientDlg::OnQueryDragIcon()
 
 void CM31CSocketClientDlg::OnBnClickedButtonSend()
 {
-	int val = GetDlgItemInt(IDC_EDIT_VALUE);
+	wchar_t str[100] = { 0, };
+	GetDlgItemText(IDC_EDIT_VALUE, str, 100);								// NULL 포함한 문자의 개수라서 100이다!!
 
 	m_clientSock.Connect(L"172.30.1.51", 25000);
-	m_clientSock.Send(&val, sizeof(int));
+	m_clientSock.Send(str, sizeof(str));							// byte 개수이다!! sizeof(str) = 200
 }

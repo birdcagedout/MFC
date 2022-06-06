@@ -20,7 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
-    <ProjectGuid>{04B4A089-5591-4893-B44F-CFED2C10EC44}</ProjectGuid>
+    <ProjectGuid>{2AEBF247-F3AB-4113-B081-C98FD1CCADC7}</ProjectGuid>
     <Keyword>MFCProj</Keyword>
     <RootNamespace>M31CSocketServer</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
@@ -183,7 +183,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="CMyServer.h" />
+    <ClInclude Include="CServerSocket.h" />
     <ClInclude Include="CUserSocket.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="M31CSocketServer.h" />
@@ -193,7 +193,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CMyServer.cpp" />
+    <ClCompile Include="CServerSocket.cpp" />
     <ClCompile Include="CUserSocket.cpp" />
     <ClCompile Include="M31CSocketServer.cpp" />
     <ClCompile Include="M31CSocketServerDlg.cpp" />

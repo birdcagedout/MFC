@@ -1,4 +1,4 @@
-﻿  CMyServer.cpp
+﻿  CServerSocket.cpp
   CUserSocket.cpp
   M31CSocketServer.cpp
   M31CSocketServerDlg.cpp

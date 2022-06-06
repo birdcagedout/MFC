@@ -33,7 +33,7 @@
     <ClInclude Include="pch.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="CMyServer.h">
+    <ClInclude Include="CServerSocket.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="CUserSocket.h">
@@ -50,7 +50,7 @@
     <ClCompile Include="pch.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="CMyServer.cpp">
+    <ClCompile Include="CServerSocket.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="CUserSocket.cpp">

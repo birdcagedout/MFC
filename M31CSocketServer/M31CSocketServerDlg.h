@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "CMyServer.h"
+#include "CServerSocket.h"
 
 // CM31CSocketServerDlg 대화 상자
 class CM31CSocketServerDlg : public CDialogEx
@@ -26,11 +26,16 @@ public:
 protected:
 	HICON m_hIcon;
 
-	CMyServer m_server;
+	CServerSocket m_serverSock;
+
+	CListBox m_eventList;					// Listbox 컨트롤 연결 변수
 
 	// 생성된 메시지 맵 함수
 	virtual BOOL OnInitDialog();
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
+
+public:
+	void AddEventString(const wchar_t* str);
 };

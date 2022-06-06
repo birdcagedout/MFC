@@ -110,10 +110,33 @@ CFileDialog fileDlg(TRUE, L"JPG", L"*.JPG", OFN_HIDEREADONLY | OFN_NOCHANGEDIR, 
 fileDlg.m_ofn.nFilterIndex = 2;
 
 
-// 선택한 파일명으로 CImage 가져오기
+// 9. 선택한 파일명으로 CImage 가져오기
 if (fileDlg.DoModal() == IDOK) {
 	m_img.Load(fileDlg.GetPathName());		// 경로를 포함한 이미지 파일명
 }
 
 
 
+// 10. CPtrList / CObList 사용하기 : CObject에서 상속받은 클래스들은 CObList에 넣고, 나머지는 CPtrList에 넣는다.
+// 1) 사용할 때
+CUserSocket* pUserSock = new CUserSocket;
+m_userSocketList.AddTail(pUserSock);
+
+// 2) 제거할 때
+CUserSocket* p;
+POSITION pos = m_userSocketList.GetHeadPosition();
+
+while (pos != NULL) {
+	p = (CUserSocket*)m_userSocketList.GetNext(pos);
+	delete p;
+	m_userSocketList.RemoveHead();
+}
+
+
+
+
+// 11. GetDlgItemText에 CString을 사용하지 않을 때(=문자열 길이를 명시해야 할 때)
+// ==> 길이는 character의 개수이지 byte가 아니다.
+// ==> 길이는 NULL을 포함한 길이이다.
+wchar_t str[3] = { 0, };
+GetDlgItemText(IDC_EDIT_VALUE, str, 2);		==> ABC라고 적었을 때 str에는 L'A' + NULL 만 들어간다. (NULL을 포함하여 2개)
