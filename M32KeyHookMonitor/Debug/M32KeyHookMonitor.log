@@ -1,4 +1,5 @@
-﻿  M32KeyHookMonitor.cpp
+﻿  pch.cpp
+  M32KeyHookMonitor.cpp
   M32KeyHookMonitorDlg.cpp
   코드를 생성하고 있습니다...
   M32KeyHookMonitor.vcxproj -> C:\Dev\MFC\M32KeyHookMonitor\Debug\M32KeyHookMonitor.exe
