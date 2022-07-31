@@ -4,8 +4,9 @@
 
 #pragma once
 
+#define MSG_THREAD_ENDED	27001
 
-// 쓰레드-메인쓰레드 사이의 통신을 위한 이벤트 객체(구조체) ==> 이러면 쓰레드 핸들 필요없음
+// 쓰레드-윈도(메인쓰레드) 사이의 통신을 위한 이벤트 구조체 ==> 이러면 쓰레드 핸들을 멤버변수로 저장할 필요없음
 struct ThreadData {
 	HWND hWnd;						// 쓰레드가 윈도쪽으로 메시지 보낼 수 있도록 윈도의 핸들 저장
 	unsigned int upperLimit;		// 쓰레드마다 달라지는 상한범위
@@ -37,8 +38,8 @@ public:
 protected:
 	HICON m_hIcon;
 
-	CListBox m_listboxData;
-	CListBox m_listboxThread;
+	CListBox m_listboxData;							// 쓰레드 동작 출력창
+	CListBox m_listboxThread;						// 쓰레드 목록 출력창
 
 	ThreadData m_threadData;
 
@@ -51,8 +52,9 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
 public:
-	afx_msg void OnBnClickedButtonTest();
+	afx_msg void OnBnClickedButtonStart();
 	afx_msg void OnDestroy();
-	afx_msg void OnBnClickedButtonStopone();
-	afx_msg void OnBnClickedButtonStopall();
+	afx_msg void OnBnClickedButtonStopSelected();
+	afx_msg void OnBnClickedButtonStopAll();
+	afx_msg LRESULT OnMsgThreadEnded(WPARAM isKilled, LPARAM pThreadData);
 };

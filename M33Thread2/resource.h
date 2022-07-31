@@ -6,6 +6,7 @@
 #define IDR_MAINFRAME                   128
 #define IDC_LIST_DATA                   1000
 #define IDC_BUTTON_TEST                 1001
+#define IDC_BUTTON_START                1001
 #define IDC_LIST_THREAD                 1002
 #define IDC_BUTTON_STOP                 1003
 #define IDC_BUTTON_STOPONE              1003

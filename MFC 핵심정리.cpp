@@ -140,3 +140,28 @@ while (pos != NULL) {
 // ==> 길이는 NULL을 포함한 길이이다.
 wchar_t str[3] = { 0, };
 GetDlgItemText(IDC_EDIT_VALUE, str, 2);		==> ABC라고 적었을 때 str에는 L'A' + NULL 만 들어간다. (NULL을 포함하여 2개)
+
+
+
+
+// 12. (클래스 마법사 쓰지 않고) 이벤트 핸들러 수동으로 추가하기
+1) .h 파일에 메시지 정의
+#define MSG_THREAD_ENDED	27001
+
+2) .h 파일 클래스에 멤버 함수 정의
+public:
+	afx_msg LRESULT OnMsgThreadEnded(WPARAM isKilled, LPARAM pThreadData);
+	
+3) .cpp 파일 메시지맵에 ON_MESSAGE()로 함수 추가
+BEGIN_MESSAGE_MAP(CM33Thread2Dlg, CDialogEx)
+	ON_WM_PAINT()
+	...
+	ON_MESSAGE(MSG_THREAD_ENDED, &CM33Thread2Dlg::OnMsgThreadEnded)
+END_MESSAGE_MAP()
+
+4) .cpp 파일에 함수 정의 구현
+afx_msg LRESULT CM33Thread2Dlg::OnMsgThreadEnded(WPARAM isKilled, LPARAM pThreadData)
+{
+	ThreadData* pData = (ThreadData*)pThreadData;
+	return 0;
+}

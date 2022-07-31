@@ -33,10 +33,11 @@ void CM33Thread2Dlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CM33Thread2Dlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_BN_CLICKED(IDC_BUTTON_TEST, &CM33Thread2Dlg::OnBnClickedButtonTest)
+	ON_BN_CLICKED(IDC_BUTTON_TEST, &CM33Thread2Dlg::OnBnClickedButtonStart)
 	ON_WM_DESTROY()
-	ON_BN_CLICKED(IDC_BUTTON_STOPONE, &CM33Thread2Dlg::OnBnClickedButtonStopone)
-	ON_BN_CLICKED(IDC_BUTTON_STOPALL, &CM33Thread2Dlg::OnBnClickedButtonStopall)
+	ON_BN_CLICKED(IDC_BUTTON_STOPONE, &CM33Thread2Dlg::OnBnClickedButtonStopSelected)
+	ON_BN_CLICKED(IDC_BUTTON_STOPALL, &CM33Thread2Dlg::OnBnClickedButtonStopAll)
+	ON_MESSAGE(MSG_THREAD_ENDED, &CM33Thread2Dlg::OnMsgThreadEnded)
 END_MESSAGE_MAP()
 
 
@@ -61,7 +62,6 @@ BOOL CM33Thread2Dlg::OnInitDialog()
 // 대화 상자에 최소화 단추를 추가할 경우 아이콘을 그리려면
 //  아래 코드가 필요합니다.  문서/뷰 모델을 사용하는 MFC 애플리케이션의 경우에는
 //  프레임워크에서 이 작업을 자동으로 수행합니다.
-
 void CM33Thread2Dlg::OnPaint()
 {
 	if (IsIconic())
@@ -94,6 +94,7 @@ HCURSOR CM33Thread2Dlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+
 // 쓰레드에 부하주는 연산
 bool IsPrimeNumber(int num)
 {
@@ -109,26 +110,31 @@ bool IsPrimeNumber(int num)
 	return true;
 }
 
+
 // 쓰레드 프로시저
 DWORD WINAPI ThreadProc(void* lpParameter)
 {
-	int index = 0;
+	int index = 0, isKilled = 0;
 	unsigned long long start = GetTickCount64();
 
 	ThreadData* pData = (ThreadData*)lpParameter;
-	long long int sum = 0;				// 최소 64bit int(표준) cf. MS에서 __int64와 같음
+	long long int sum = 0;								// 최소 64bit int(표준) cf. MS에서 __int64와 같음
 
+	// 쓰레드 작업 시작
 	CString str;
-	str.Format(L"[ThreadID=%08x] 작업을 시작합니다.", pData->threadID);
+	str.Format(L"[ThreadID=%08X] 작업을 시작합니다.", pData->threadID);
 	index = pData->pListbox->InsertString(-1, str);
 	pData->pListbox->SetCurSel(index);
 
+	unsigned int i;
+	for (i = 2; i < pData->upperLimit; i++) {
 
-	for (int i = 2; i < 500000; i++) {
-
-		// 이벤트 객체값이 set(signaled)되었는지를 기다리는 함수 = WaitForSingleObject
-		// 반환값: WAIT_OBJECT_0 (이벤트 signaled) / WAIT_TIMEOUT (이벤트 unsignaled + 대기시간 초과)
+		// 쓰레드 종료 이벤트 기다림
 		if (WaitForSingleObject(pData->hKillEvent, 0) == WAIT_OBJECT_0) {
+			str.Format(L"====> 작업중단: 쓰레드 종료 이벤트 set");
+			index = pData->pListbox->InsertString(-1, str);
+			pData->pListbox->SetCurSel(index);
+			isKilled = 1;
 			break;
 		}
 
@@ -143,19 +149,26 @@ DWORD WINAPI ThreadProc(void* lpParameter)
 		}
 	}
 
-	str.Format(L"[%05lldms] The sum of all the prime numbers b/w 2 ~ 50,000 = %lld ", (GetTickCount64() - start), sum);
-	
+	str.Format(L"[ThreadID=%08X] 작업종료: %lld까지 소수 합계 = %lld (%lldms)", pData->threadID, pData->upperLimit, i, sum, (GetTickCount64() - start));
 	index = pData->pListbox->InsertString(-1, str);
 	pData->pListbox->SetCurSel(index);
 
 	CloseHandle(pData->hThread);
-	pData->hThread = NULL;						// 핸들값이 NULL이면 쓰레드 죽었음 guaranteed
+
+	// 혹시나 몰라서 이벤트 한번 더 체크
+	if (WaitForSingleObject(pData->hKillEvent, 0) == WAIT_OBJECT_0) {
+		isKilled = 1;
+	}
+
+	// 부모 윈도에 메시지(쓰레드 종료) 보냄
+	::PostMessage(pData->hWnd, MSG_THREAD_ENDED, isKilled, (LPARAM)pData);
+
 	return 0;
 }
 
 
 
-void CM33Thread2Dlg::OnBnClickedButtonTest()
+void CM33Thread2Dlg::OnBnClickedButtonStart()
 {
 	// 쓰레드 추가할 때마다 새로운 ThreadData 생성
 	ThreadData* pData = new ThreadData;
@@ -167,9 +180,17 @@ void CM33Thread2Dlg::OnBnClickedButtonTest()
 	// 쓰레드 생성 ==> CreateThread(보안속성, 스택사이즈=최대1MB(기본값0), 함수인자, 생성시바로실행/멈춤상태, 쓰레드ID)
 	pData->hThread = CreateThread(NULL, 0, ThreadProc, pData, 0, &(pData->threadID));
 
-	// 쓰레드 정보 리스트박스에 기록
+	// 쓰레드 생성 실패한 경우
+	if (pData->hThread == NULL) {
+		AfxMessageBox(L"쓰레드 생성에 실패했습니다.\r\n초기화합니다.", MB_OK | MB_ICONERROR);
+		CloseHandle(pData->hKillEvent);
+		delete pData;
+		return;
+	}
+
+	// 쓰레드 목록 리스트박스에 기록
 	CString str;
-	str.Format(L"[ThreadID=%08x] %6u까지 소수 합산", pData->threadID, pData->upperLimit);
+	str.Format(L"[ThreadID=%08X] %6u까지 소수 합산", pData->threadID, pData->upperLimit);
 	int index = m_listboxThread.InsertString(-1, str);
 	m_listboxThread.SetItemDataPtr(index, pData);			// 리스트박스 item마다 들어있는 4byte DataPtr 활용(CPtrList 필요없음)
 
@@ -181,39 +202,90 @@ void CM33Thread2Dlg::OnDestroy()
 {
 	CDialogEx::OnDestroy();
 
-	// 프로그램(main쓰레드) 종료시 쓰레드(worker쓰레드)를 먼저 안전하게 종료해야 함
-	if (m_threadData.hThread != NULL) {
+	OnBnClickedButtonStopAll();
+}
 
-		SetEvent(m_threadData.hKillEvent);			// 이벤트 객체 = 1 (쓰레드 종료해라)
 
-		// 쓰레드 종료까지 기다리는 방법 ==> 메시지 처리할 것 (메시지 처리하면서 쓰레드도 정상적으로 작동 후 종료되도록 유도)
-		MSG msg;
-		while (m_threadData.hThread != NULL) {
 
-			// WM_QUIT이면 0, 그 외이면 nonzero 리턴
-			// ==> 실제로는 WM_DESTROY가 들어온 상태에서 또다시 WM_QUIT이 들어오는 경우는 없기 때문에 else부분은 실행 안 됨
-			if (GetMessage(&msg, NULL, 0, 0) != 0) {
-				TranslateMessage(&msg);
-				DispatchMessage(&msg);
+
+
+void CM33Thread2Dlg::OnBnClickedButtonStopSelected()
+{
+	int index = m_listboxThread.GetCurSel();
+	if (index != LB_ERR) {
+		ThreadData* pData = (ThreadData*)m_listboxThread.GetItemDataPtr(index);
+
+		if (pData->hThread != NULL) {
+			SetEvent(pData->hKillEvent);
+
+			MSG msg;
+			while (pData->hThread != NULL) {
+				if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) != NULL) {
+					TranslateMessage(&msg);
+					DispatchMessage(&msg);
+				}
 			}
-			else {
-				break;
-			}
+			delete pData;
 		}
 	}
 }
 
 
-
-
-
-void CM33Thread2Dlg::OnBnClickedButtonStopone()
+void CM33Thread2Dlg::OnBnClickedButtonStopAll()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	ThreadData* pData;
+	int count = m_listboxThread.GetCount();
+
+	for (int i = 0; i < count; i++) {
+		pData = (ThreadData*)m_listboxThread.GetItemDataPtr(i);
+		SetEvent(pData->hKillEvent);
+	}
+
+	CString str;
+	str.Format(L"Thread %d개를 모두 종료합니다.", count);
+	int index = m_listboxData.InsertString(-1, str);
+	m_listboxData.SetCurSel(index);
+
+	MSG msg;
+	while (count >= 1) {
+		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) != NULL) {
+			if (msg.message == MSG_THREAD_ENDED) {
+				count--;
+				msg.wParam = 0;			// 강제로 죽였지만(1) 쓰레드데이터 바로 삭제하도록 자연사(0)로 위장
+			}
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+	}
+
+	index = m_listboxData.InsertString(-1, L"모든 쓰레드 종료되었습니다.");
+	m_listboxData.SetCurSel(index);
 }
 
 
-void CM33Thread2Dlg::OnBnClickedButtonStopall()
+
+afx_msg LRESULT CM33Thread2Dlg::OnMsgThreadEnded(WPARAM isKilled, LPARAM pThreadData)
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	ThreadData* pData = (ThreadData*)pThreadData;
+	int count = m_listboxThread.GetCount();
+
+	for (int i = 0; i < count; i++) {
+		if (m_listboxThread.GetItemDataPtr(i) == pData) {
+			m_listboxThread.DeleteString(i);
+			CloseHandle(pData->hKillEvent);
+
+			// 자연사한 경우 ==> 데이터 바로 삭제
+			if (isKilled == 0) {
+				delete pData;
+			}
+			// 강제로 죽인 경우 ==> OnBnClickedButtonStopSelected() 에서 데이터 삭제하도록 유도
+			else {
+				pData->hThread = NULL;
+			}
+
+			break;
+		}
+	}
+
+	return 0;
 }
